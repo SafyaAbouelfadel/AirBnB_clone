@@ -9,7 +9,7 @@ Each task is linked and will help you to:
 - create the first abstracted storage engine of the project: File storage.
 - create all unittests to validate all our classes and storage engine
 
-#Files and Directories
+# Files and Directories
 - models directory will contain all classes used for the entire project. A class, called “model” in a OOP project is the representation of an object/instance.
 
 - tests directory will contain all unit tests.
@@ -25,7 +25,7 @@ Each task is linked and will help you to:
 - models/engine directory will contain all storage classes (using the same prototype). For the moment you will have only one: file_storage.py**
 
 
-#Description of the command interpreter
+# Description of the command interpreter
 - Its exactly the same as the shell but limited to a specific use-case. In our case, we want to be able to manage the objects of our project:
 
   - Create a new object (ex: a new User or a new Place)
@@ -35,7 +35,7 @@ Each task is linked and will help you to:
   - Destroy an object
 
 # How to start it, How to use it
-##Execution
+## Execution
 Your shell should work like this in interactive mode:
 ```bash
 $ ./console.py
