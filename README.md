@@ -74,7 +74,7 @@ EOF  help  quit
 (hbnb)
 $
 ```
-#Usage
+# Usage
 Start the console in interactive mode:
 ```bash
 $ ./console.py
