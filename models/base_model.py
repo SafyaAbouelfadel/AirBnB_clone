@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """file containing basemodel class"""
 from datetime import datetime
-from models import storage
+import models
 from uuid import uuid4
 
 
@@ -22,30 +22,30 @@ class BaseModel(object):
         to_dict: Returns a dictionary representation of the BaseModel instance.
     """
 
-    def __init__(self, *arg, **kwargs):
+    def __init__(self, *args, **kwargs):
         """Initialize a new instance of the BaseModel class.
 
         Args:
             *args: Not Used.
             **kwargs: Arbitrary keyword arguments.
         """
-        if kwargs is None or len(kwargs) == 0:
-            self.id = str(uuid4())
-            self.created_at = datetime.now()
-            self.updated_at = datetime.now()
-            storage.new(self)
+        if kwargs:
+            for key, value in kwargs.items():
+                if key != "__class__":
+                    setattr(self, key, value)
+            if hasattr(self, "created_at") and type(self.created_at) is str:
+                self.created_at = datetime.strptime(
+                        kwargs["created_at"], "%Y-%m-%dT%H:%M:%S.%f")
+            if hasattr(self, "updated_at") and type(self.updated_at) is str:
+                self.updated_at = datetime.strptime(
+                        kwargs["updated_at"], "%Y-%m-%dT%H:%M:%S.%f")
 
         else:
-            for key, value in kwargs.items():
-                if key in ["created_at", "updated_at"]:
-                    # Check if value is already a datetime object
-                    if isinstance(value, datetime):
-                        setattr(self, key, value)
-                    else:
-                        tm = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
-                        setattr(self, key, tm)
-                elif key != "__class__":
-                    setattr(self, key, value)
+            self.id = str(uuid4())
+            self.created_at = datetime.now()
+            self.updated_at = self.created_at
+            models.storage.new(self)
+            models.storage.save()
 
     def __str__(self):
         """class str method"""
@@ -58,12 +58,12 @@ class BaseModel(object):
     def save(self):
         ''' updates updated_at with the current time'''
         self.updated_at = datetime.now()
-        storage.save()
+        models.storage.save()
 
     def to_dict(self):
         '''  returns a dictionary of the instance'''
-        self_dict = dict(self.__dict__)
+        self_dict = self.__dict__.copy()
         self_dict['__class__'] = self.__class__.__name__
-        self_dict['created_at'] = datetime.isoformat(self.created_at)
-        self_dict['created_at'] = datetime.isoformat(self.created_at)
+        self_dict['created_at'] = self.created_at.isoformat()
+        self_dict['created_at'] = self.updated_at.isoformat()
         return self_dict
