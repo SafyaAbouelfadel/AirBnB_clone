@@ -5,6 +5,8 @@ A command line interpreter for the AirBnB clone
 
 import cmd
 from models import storage
+import re
+from shlex import split
 from models.base_model import BaseModel
 from models.user import User
 from models.state import State
@@ -20,7 +22,7 @@ class HBNBCommand(cmd.Cmd):
         program
     """
     prompt = "(hbnb) "
-    
+
     __classes_list = {
         BaseModel.__name__: BaseModel,
         User.__name__: User,
@@ -30,7 +32,7 @@ class HBNBCommand(cmd.Cmd):
         Amenity.__name__: Amenity,
         Review.__name__: Review
     }
-    
+
     def parse(arg, id=" "):
         """
         Returns a list conatning the parsed arguments from the string
@@ -47,7 +49,7 @@ class HBNBCommand(cmd.Cmd):
     def do_quit(self, arg):
         """Quit command to exit the program."""
         return True
-        
+
     def do_EOF(self, arg):
         """EOF signal to exit the program."""
         print("")
@@ -56,7 +58,7 @@ class HBNBCommand(cmd.Cmd):
     def emptyline(self):
         """Do nothins when receiving an empty line."""
         pass
-    
+
     def do_create(self, arg):
         """
         Usage: create <class>
@@ -96,7 +98,7 @@ class HBNBCommand(cmd.Cmd):
             print("** no instance found **")
             return False
         print(objt["{}.{}".format(arg_list[0], arg_list[1])])
-        
+
     def do_destroy(self, arg):
         """
         Usage: destroy <class> <id> or <class>.distroy(<id>)
@@ -119,7 +121,7 @@ class HBNBCommand(cmd.Cmd):
             return False
         del objt["{}.{}".format(arg_list[0], arg_list[1])]
         storage.save()
-        
+
     def do_all(self, arg):
         """
         Usage: all | all <class> | <class>.all()
@@ -149,9 +151,50 @@ class HBNBCommand(cmd.Cmd):
         Update the instance of a given id by adding
         or updating a given attribute.
         """
-        # to-do
+        arg_list = HBNBCommand.parse(arg)
+        objs = storage.all()
+        if len(arg_list) == 0:
+            print("** class name missing **")
+            return False
+        if arg_list[0] not in HBNBCommand.__classes_list:
+            print("** class doesn't exist **")
+            return False
+        if len(arg_list) == 1:
+            print("** instance id missing **")
+            return False
+        if "{}.{}".format(arg_list[0], arg_list[1]) not in objs:
+            print("** no instance found **")
+            return False
+        if len(arg_list) == 2:
+            print("** attribute name missing **")
+            return False
+        if len(arg_list) == 3:
+            try:
+                type(eval(arg_list[2])) != dict
+            except NameError:
+                print("** value missing **")
+                return False
+        if len(arg_list) == 4:
+            objt = objs["{}.{}".format(arg_list[0], arg_list[1])]
+            if arg_list[2] in objt.__class__.__dict__.keys():
+                type_val = type(objt.__class__.__dict__[arg_list[2]])
+                objt.__dict__[arg_list[2]] = type_val(arg_list[3])
+            else:
+                objt.__dict__[arg_list[2]] = arg_list[3]
+        elif type(eval(arg_list[2])) == dict:
+            objt = objs["{}.{}".format(arg_list[0], arg_list[1])]
+            for key, value in eval(arg_list[2]).items():
+                if (
+                    key in objt.__class__.__dict__.keys() and
+                    type(objt.__class__.__dict__[key]) in [str, int, float]
+                ):
+                    type_val = type(objt.__class__.__dict__[key])
+                    objt.__dict__[key] = type_val(value)
+                else:
+                    objt.__dict__[key] = value
+        storage.save()
 
-     def do_count(self, arg):
+    def do_count(self, arg):
         """
         Usage: count <class> or <class>.count()
 
@@ -159,12 +202,12 @@ class HBNBCommand(cmd.Cmd):
         """
         arg_list = HBNBCommand.parse(arg)
         count = 0
-        for obj in storage.all().values():
-            if arg_list[0] == obj.__class__.__name__:
+        for objt in storage.all().values():
+            if arg_list[0] == objt.__class__.__name__:
                 count += 1
         print(count)
 
-        def default(self, arg):
+    def default(self, arg):
         """Handle commands that are not recognized.
 
         Args:
@@ -173,7 +216,24 @@ class HBNBCommand(cmd.Cmd):
         Returns:
             bool: False if the command is not recognized.
         """
-        # to-do
+        dfault_args = {
+            "all": self.do_all,
+            "count": self.do_count,
+            "destroy": self.do_destroy,
+            "show": self.do_show,
+            "update": self.do_update
+        }
+        key_match = re.search(r"\.", arg)
+        if key_match is not None:
+            args = [arg[:key_match.span()[0]], arg[key_match.span()[1]:]]
+            key_match = re.search(r"\((.*?)\)", args[1])
+            if key_match is not None:
+                command = [args[1][:key_match.span()[0]], key_match.group()[1:-1]]
+                if command[0] in dfault_args.keys():
+                    call_comand = "{} {}".format(args[0], command[1])
+                    return dfault_args[command[0]](call_comand)
+        print("** Unknown syntax: {}".format(arg))
+        return False
 
 
 if __name__ == '__main__':
