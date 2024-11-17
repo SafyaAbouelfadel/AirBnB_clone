@@ -23,7 +23,7 @@ class FileStorage:
         save: Serialize __objects to the JSON file.
         reload: Deserialize the JSON file to __objects, if it exists.
     """
-    __file_path = file.json
+    __file_path = "file.json"
     __objects = {}
 
     def all(self) -> dict:
@@ -32,20 +32,27 @@ class FileStorage:
 
     def new(self, obj) -> None:
         """Set in __objects the obj with key `<obj class name>.id`."""
-        FileStorage.__objects[obj.__class.__name + "." + obj.id]
+        FileStorage.__objects["{}.{}".format(
+            obj.__class__.__name__,
+            obj.id
+        )] = obj
 
     def save(self) -> None:
         """serializes __objects to the JSON file"""
         temp_dict = dict()
-        for keys in self.__objects.keys():
+        for keys in self.__objects:
             temp_dict[keys] = self.__objects[keys].to_dict()
         with open(self.__file_path, mode='w') as jsonfile:
             json.dump(temp_dict, jsonfile)
-            
+
     def reload(self) -> None:
         """deserializes the JSON file to __objects"""
         try:
-            # to-do reload
-            
+            with open(FileStorage.__file_path) as fl:
+                dct_objt = json.load(fl)
+                for objt in dct_objt.values():
+                    clss_name = objt["__class__"]
+                    del objt["__class__"]
+                    self.new(eval(clss_name)(**objt))
         except:
             pass
