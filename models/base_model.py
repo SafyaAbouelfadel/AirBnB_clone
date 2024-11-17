@@ -65,5 +65,5 @@ class BaseModel(object):
         self_dict = self.__dict__.copy()
         self_dict['__class__'] = self.__class__.__name__
         self_dict['created_at'] = self.created_at.isoformat()
-        self_dict['created_at'] = self.updated_at.isoformat()
+        self_dict['updated_at'] = self.updated_at.isoformat()
         return self_dict
