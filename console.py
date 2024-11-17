@@ -34,17 +34,26 @@ class HBNBCommand(cmd.Cmd):
     }
 
     def parse(arg, id=" "):
-        """
-        Returns a list conatning the parsed arguments from the string
-        """
+        """Parse a string argument and return a list of items.
 
-        parg_list = arg.split(id)
-        arg_list = []
-
-        for k in parg_list:
-            if k != '':
-                arg_list.append(k)
-        return arg_list
+        Args:
+            arg (str): The input string to be parsed..
+        """
+        curly = re.search(r"\{(.*?)\}", arg)
+        Sr_brackets = re.search(r"\[(.*?)\]", arg)
+        if curly is None:
+            if Sr_brackets is None:
+                return [itm.strip(",") for itm in split(arg)]
+            else:
+                main_pces = split(arg[:Sr_brackets.span()[0]])
+                return_list = [itm.strip(",") for itm in main_pces]
+                return_list.append(Sr_brackets.group())
+                return return_list
+        else:
+            main_pces = split(arg[:curly.span()[0]])
+            return_list = [itm.strip(",") for itm in main_pces]
+            return_list.append(curly.group())
+            return return_list
 
     def do_quit(self, arg):
         """Quit command to exit the program."""
