@@ -9,6 +9,7 @@ from models.review import Review
 from models.state import State
 from models.user import User
 
+
 class FileStorage:
     """Manage the storage of objects in a JSON file.
 
@@ -54,5 +55,5 @@ class FileStorage:
                     clss_name = objt["__class__"]
                     del objt["__class__"]
                     self.new(eval(clss_name)(**objt))
-        except:
+        except FileNotFoundError:
             pass

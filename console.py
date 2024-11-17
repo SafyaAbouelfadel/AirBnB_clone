@@ -78,7 +78,7 @@ class HBNBCommand(cmd.Cmd):
         if (len(arg_list) == 0):
             print("** class name missing **")
             return False
-            
+
         if arg_list[0] not in HBNBCommand.__classes_list:
             print("** class doesn't exist **")
             return False
@@ -88,8 +88,8 @@ class HBNBCommand(cmd.Cmd):
     def do_show(self, arg):
         """
         Usage: show <class> <id> or <class>.show(<id>)
-        
-        Prints the string representation of 
+
+        Prints the string representation of
         an instance based of an id
         """
         arg_list = HBNBCommand.parse(arg)
@@ -136,7 +136,7 @@ class HBNBCommand(cmd.Cmd):
         Usage: all | all <class> | <class>.all()
 
         Prints all string representation of all instances
-        based or not on the class name. 
+        based or not on the class name.
         """
         arg_list = HBNBCommand.parse(arg)
         if len(arg_list) > 0 and arg_list[0] not in HBNBCommand.__classes_list:
@@ -232,12 +232,12 @@ class HBNBCommand(cmd.Cmd):
             "show": self.do_show,
             "update": self.do_update
         }
-        key_match = re.search(r"\.", arg)
-        if key_match is not None:
-            args = [arg[:key_match.span()[0]], arg[key_match.span()[1]:]]
-            key_match = re.search(r"\((.*?)\)", args[1])
-            if key_match is not None:
-                command = [args[1][:key_match.span()[0]], key_match.group()[1:-1]]
+        key_mch = re.search(r"\.", arg)
+        if key_mch is not None:
+            args = [arg[:key_mch.span()[0]], arg[key_mch.span()[1]:]]
+            key_mch = re.search(r"\((.*?)\)", args[1])
+            if key_mch is not None:
+                command = [args[1][:key_mch.span()[0]], key_mch.group()[1:-1]]
                 if command[0] in dfault_args.keys():
                     call_comand = "{} {}".format(args[0], command[1])
                     return dfault_args[command[0]](call_comand)
